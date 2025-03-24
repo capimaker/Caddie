@@ -23,7 +23,7 @@ struct Hole: Identifiable {
     let par: Int
     let distance: Int // Distance in meters
     let holeLocation: CGPoint // Where the hole is on the image
-    let teePositions: [String: CGPoint] // Different tee locations
+    //var teePositions: [String: CGPoint] // Different tee locations
     var shots: [CGPoint] = [] // Stores shot locations on the hole image
 }
 
@@ -38,35 +38,38 @@ struct CourseSelectionView: View {
                     number: 1,
                     par: 4,
                     distance: 350,
-                    holeLocation: CGPoint(x: 0.9, y: 0.2), // Flag position on the hole image
-                    teePositions: [
+                    holeLocation: CGPoint(x: 0.9, y: 0.2) // Flag position on the hole image
+                   /* teePositions: [
                         "White": CGPoint(x: 0.1, y: 0.8),
                         "Blue": CGPoint(x: 0.15, y: 0.75),
                         "Red": CGPoint(x: 0.2, y: 0.7)
-                    ]
+                    ]*/
                 ),
+                
                 Hole(
                     number: 2,
                     par: 5,
                     distance: 480,
-                    holeLocation: CGPoint(x: 0.85, y: 0.15),
-                    teePositions: [
+                    holeLocation: CGPoint(x: 0.85, y: 0.15)
+                   /* teePositions: [
                         "White": CGPoint(x: 0.05, y: 0.85),
                         "Blue": CGPoint(x: 0.1, y: 0.8),
                         "Red": CGPoint(x: 0.15, y: 0.75)
-                    ]
+                    ]*/
                 ),
+                
                 Hole(
                     number: 3,
                     par: 3,
                     distance: 150,
-                    holeLocation: CGPoint(x: 0.92, y: 0.18),
-                    teePositions: [
+                    holeLocation: CGPoint(x: 0.92, y: 0.18)
+                    /*teePositions: [
                         "White": CGPoint(x: 0.2, y: 0.9),
                         "Blue": CGPoint(x: 0.25, y: 0.85),
                         "Red": CGPoint(x: 0.3, y: 0.8)
-                    ]
+                    ]*/
                 ),
+                
                 // Add remaining 15 holes...
             ]
         ),
@@ -79,35 +82,38 @@ struct CourseSelectionView: View {
                     number: 1,
                     par: 4,
                     distance: 350,
-                    holeLocation: CGPoint(x: 0.9, y: 0.2), // Flag position on the hole image
-                    teePositions: [
+                    holeLocation: CGPoint(x: 0.9, y: 0.2) // Flag position on the hole image
+                    /*teePositions: [
                         "White": CGPoint(x: 0.1, y: 0.8),
                         "Blue": CGPoint(x: 0.15, y: 0.75),
                         "Red": CGPoint(x: 0.2, y: 0.7)
-                    ]
+                    ]*/
                 ),
+                
                 Hole(
                     number: 2,
                     par: 5,
                     distance: 480,
-                    holeLocation: CGPoint(x: 0.85, y: 0.15),
-                    teePositions: [
+                    holeLocation: CGPoint(x: 0.85, y: 0.15)
+                    /*teePositions: [
                         "White": CGPoint(x: 0.05, y: 0.85),
                         "Blue": CGPoint(x: 0.1, y: 0.8),
                         "Red": CGPoint(x: 0.15, y: 0.75)
-                    ]
+                    ]*/
                 ),
+                
                 Hole(
                     number: 3,
                     par: 3,
                     distance: 150,
-                    holeLocation: CGPoint(x: 0.92, y: 0.18),
-                    teePositions: [
+                    holeLocation: CGPoint(x: 0.92, y: 0.18)
+                    /*teePositions: [
                         "White": CGPoint(x: 0.2, y: 0.9),
                         "Blue": CGPoint(x: 0.25, y: 0.85),
                         "Red": CGPoint(x: 0.3, y: 0.8)
-                    ]
+                    ]*/
                 ),
+                
                 // Add remaining 15 holes...
             ]
             ),
@@ -143,7 +149,10 @@ struct CourseSelectionView: View {
                     }
                 }
                 
-                NavigationLink(destination: ContentView(selectedCourse: selectedCourse), isActive: $navigateToMap) {
+                NavigationLink(
+                    destination: selectedCourse.map { ContentView(selectedCourse: $0) },
+                    isActive: $navigateToMap
+                ) {
                     EmptyView()
                 }
                 .hidden()

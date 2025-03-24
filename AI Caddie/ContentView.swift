@@ -10,46 +10,39 @@ import MapKit
 
 struct ContentView: View {
     var selectedCourse: GolfCourse
-    var selectedTee: String
+    //var selectedTee: String
     @State private var currentHoleIndex = 0
-    @State private var shots: [CGPoint] = []
+    @State private var shots: [CGPoint] = [] // Store shots in @State
     @State private var showCourseSelection = false
     @State private var showClubSettings = false // New state to show "Mi Bolsa"
-    
+
     var body: some View {
         VStack {
             let holes = selectedCourse.holes
-            var currentHole = holes[currentHoleIndex]
-            let holeLocation = currentHole.holeLocation
-            let startingPosition = currentHole.teePositions[selectedTee] ?? holeLocation
-            
-            // If first shot, set tee position as first shot
-            if currentHole.shots.isEmpty {
-                currentHole.shots.append(startingPosition)
-            }
-            
-            
+            let holeLocation = holes[currentHoleIndex].holeLocation
+            //let startingPosition = holes[currentHoleIndex].teePositions[selectedTee] ?? holeLocation
+
             Text("\(selectedCourse.name)")
                 .font(.title)
                 .bold()
                 .padding()
             
-            Text("Hoyo \(currentHole.number)")
+            Text("Hoyo \(holes[currentHoleIndex].number)")
                 .font(.largeTitle)
                 .bold()
             
-            Text("Par: \(currentHole.par)")
+            Text("Par: \(holes[currentHoleIndex].par)")
                 .font(.title2)
                 .padding(.bottom, 5)
             
-            Text("Distancia: \(currentHole.distance) metros")
+            Text("Distancia: \(holes[currentHoleIndex].distance) metros")
                 .font(.title3)
                 .foregroundColor(.gray)
             
             // 📍 Hole Image (Tap to Register Shot)
             ZStack {
                 GeometryReader { geo in
-                    Image("hole\(currentHole.number)")
+                    Image("hole\(holes[currentHoleIndex].number)")
                         .resizable()
                         .scaledToFit()
                         .frame(height: 300)
@@ -70,32 +63,33 @@ struct ContentView: View {
                                         x: tapLocation.x / geo.size.width,
                                         y: tapLocation.y / geo.size.height
                                     )
-                                   // registerShot(at: relativeLocation, in: currentHole, holeLocation: holeLocation)
+                                    registerShot(at: relativeLocation)
                                 }
                         )
                 }
             }
-            
+
             // 🎯 Shot Distance and Club Recommendation
-            if currentHole.shots.count > 1 {
-                let lastShot = currentHole.shots.last!
-                let distanceToHole = calculateDistance(from: lastShot, to: holeLocation, hole: currentHole)
+            if shots.count > 1 {
+                let lastShot = shots.last!
+                let distanceToHole = calculateDistance(from: lastShot, to: holeLocation)
                 let club = suggestClub(for: distanceToHole)
-                
+
                 Text("Distancia al hoyo: \(String(format: "%.2f", distanceToHole)) metros")
                     .font(.headline)
                     .foregroundColor(.blue)
-                
+
                 Text("Palo recomendado: \(club)")
                     .font(.subheadline)
                     .foregroundColor(.green)
             }
-            
+
             // ⬅️ Previous & Next Hole Buttons
             HStack {
                 Button(action: {
                     if currentHoleIndex > 0 {
                         currentHoleIndex -= 1
+                        loadShots()
                     }
                 }) {
                     Image(systemName: "arrow.left.circle.fill")
@@ -104,12 +98,13 @@ struct ContentView: View {
                 }
                 .disabled(currentHoleIndex == 0)
                 .padding()
-                
+
                 Spacer()
-                
+
                 Button(action: {
                     if currentHoleIndex < holes.count - 1 {
                         currentHoleIndex += 1
+                        loadShots()
                     }
                 }) {
                     Image(systemName: "arrow.right.circle.fill")
@@ -119,7 +114,7 @@ struct ContentView: View {
                 .disabled(currentHoleIndex == holes.count - 1)
                 .padding()
             }
-            
+
             // 🔙 Buttons for Course Selection & "Mi Bolsa"
             HStack {
                 Button("Seleccion de Campo") {
@@ -130,9 +125,9 @@ struct ContentView: View {
                 .fullScreenCover(isPresented: $showCourseSelection) {
                     CourseSelectionView()
                 }
-                
+
                 Spacer()
-                
+
                 Button("Mi Bolsa") {
                     showClubSettings = true
                 }
@@ -143,22 +138,33 @@ struct ContentView: View {
                 }
             }
         }
+        .onAppear {
+            loadShots() // ✅ Initialize shots when the view appears
+        }
     }
-    
-    
+
+    // ✅ Load initial shots for the hole
+    func loadShots() {
+        let holes = selectedCourse.holes
+        let holeLocation = holes[currentHoleIndex].holeLocation
+      //  let startingPosition = holes[currentHoleIndex].teePositions[selectedTee] ?? holeLocation
+        
+       // shots = [startingPosition] // Set first shot at the selected tee
+    }
+
     // 📍 Register Shot on Hole Image
     func registerShot(at location: CGPoint) {
-        shots.append(location) // Add new shot
+        shots.append(location) // ✅ Add new shot
     }
-    
+
     // 📏 Calculate Distance Between Two Shots
-    func calculateDistance(from: CGPoint, to: CGPoint, hole: Hole) -> Double {
-        let imageWidth: Double = 300 // Assume the hole image width in meters
+    func calculateDistance(from: CGPoint, to: CGPoint) -> Double {
+        let imageWidth: Double = 300 // Assume hole image width represents 300 meters
         let dx = (to.x - from.x) * imageWidth
         let dy = (to.y - from.y) * imageWidth
         return sqrt(dx * dx + dy * dy)
     }
-    
+
     // 🏌️ Suggest a Club Based on Distance
     func suggestClub(for distance: Double) -> String {
         // Load saved club distances from AppStorage
@@ -175,7 +181,7 @@ struct ContentView: View {
             }
             return nil
         }
-            .sorted { $0.1 > $1.1 } // Sort clubs from longest to shortest distance
+        .sorted { $0.1 > $1.1 } // Sort clubs from longest to shortest distance
         
         // Find the best club for the given distance
         for (club, clubDistance) in sortedClubs {
